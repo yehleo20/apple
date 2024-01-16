@@ -80,9 +80,9 @@ simpleCart.bind('beforeAdd', function (item) {
       // 检查是否为同一房间
       if (existingRoomId === newRoomId) {
           // 检查新的日期范围是否与已有订单有冲突
-          if (newCheckInDate >= existingCheckInDate && newCheckInDate < existingCheckOutDate ||
-              newCheckOutDate > existingCheckInDate && newCheckOutDate <= existingCheckOutDate || 
-              newCheckOutDate > existingCheckOutDate && newCheckInDate < existingCheckInDate ) {
+          if (newCheckInDate.getTime() >= existingCheckInDate.getTime() && newCheckInDate.getTime() < existingCheckOutDate.getTime() ||
+          newCheckOutDate.getTime() > existingCheckInDate.getTime() && newCheckOutDate.getTime() <= existingCheckOutDate.getTime() || 
+          newCheckOutDate.getTime() > existingCheckOutDate.getTime() && newCheckInDate.getTime() < existingCheckInDate.getTime()) {
               // 如果冲突，阻止添加商品并给出相应提示
               alert('该房间在选定日期范围内已被预订！');
               return false;
