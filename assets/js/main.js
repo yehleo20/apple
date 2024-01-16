@@ -40,60 +40,53 @@ simpleCart({
 //*加入房間的時段判斷
 
 simpleCart.bind('beforeAdd', function (item) {
-  // 获取购物车中的商品列表
   var items = simpleCart.items();
-
-  // 获取新添加的商品的信息
+  
   var newRoomId = item.get('name');
-  var newCheckInDate = new Date(item.get('date'));
-  var newCheckOutDate = new Date(item.get('session'));
-  var price = parseFloat(item.get('price')); //重新定義價格
+  var newCheckInDateString = item.get('date');
+  var newCheckOutDateString = item.get('session');
+  var price = parseFloat(item.get('price'));
 
- 
- 
+  // Convert date strings to Date objects
+  var newCheckInDate = new Date(newCheckInDateString.replace(/-/g, '/'));
+  var newCheckOutDate = new Date(newCheckOutDateString.replace(/-/g, '/'));
+  
+  // Set time parts to zero
+  newCheckInDate.setHours(0, 0, 0, 0);
+  newCheckOutDate.setHours(0, 0, 0, 0);
 
-    // 将时间部分设为零，只保留日期
-      newCheckInDate.setHours(0, 0, 0, 0);
-      newCheckOutDate.setHours(0, 0, 0, 0);
+  var dateDiffInDays = Math.floor((newCheckOutDate - newCheckInDate) / (1000 * 60 * 60 * 24));
+  item.set('price', price * dateDiffInDays);
 
-    // 计算日期差异，以天为单位
-    var dateDiffInDays = (newCheckOutDate-newCheckInDate)/ (1000 * 60 * 60 * 24);
-     // 设置新的 total 值
-     item.set('price', price * dateDiffInDays);
+  if (newCheckInDate - newCheckOutDate === 0) {
+      alert('至少要訂１天喔！');
+      return false;
+  }
 
-
-  // var df=newCheckOutDate-newCheckInDate==0;
-  // console.log(newCheckInDate);
-  // console.log(newCheckOutDate);
-  // console.log(df);
-
-  if(newCheckInDate-newCheckOutDate==0 ) 
-  {alert('至少要訂１天喔！');
-  return false;}
-
-  // 遍历购物车中已有的商品
   for (var i = 0; i < items.length; i++) {
       var existingRoomId = items[i].get('name');
-      var existingCheckInDate = new Date(items[i].get('date'));
-      var existingCheckOutDate = new Date(items[i].get('session'));
+      var existingCheckInDateString = items[i].get('date');
+      var existingCheckOutDateString = items[i].get('session');
 
-      // 检查是否为同一房间
+      // Convert existing date strings to Date objects
+      var existingCheckInDate = new Date(existingCheckInDateString.replace(/-/g, '/'));
+      var existingCheckOutDate = new Date(existingCheckOutDateString.replace(/-/g, '/'));
+
       if (existingRoomId === newRoomId) {
-          // 检查新的日期范围是否与已有订单有冲突
-          if (newCheckInDate.getTime() >= existingCheckInDate.getTime() && newCheckInDate.getTime() < existingCheckOutDate.getTime() ||
-          newCheckOutDate.getTime() > existingCheckInDate.getTime() && newCheckOutDate.getTime() <= existingCheckOutDate.getTime() || 
-          newCheckOutDate.getTime() > existingCheckOutDate.getTime() && newCheckInDate.getTime() < existingCheckInDate.getTime()) {
-              // 如果冲突，阻止添加商品并给出相应提示
-              alert('该房间在选定日期范围内已被预订！');
+          if (
+              newCheckInDate.getTime() >= existingCheckInDate.getTime() && newCheckInDate.getTime() < existingCheckOutDate.getTime() ||
+              newCheckOutDate.getTime() > existingCheckInDate.getTime() && newCheckOutDate.getTime() <= existingCheckOutDate.getTime() || 
+              newCheckOutDate.getTime() > existingCheckOutDate.getTime() && newCheckInDate.getTime() < existingCheckInDate.getTime()
+          ) {
+              alert('該房間在選定日期範圍內已被預訂！');
               return false;
           }
       }
   }
 
-
-  // 如果没有冲突，允许添加商品到购物车
   return true;
 });
+
 
 
 
